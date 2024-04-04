@@ -11,10 +11,4 @@ sealed class DSLintAnnotation(name: String) {
 			const val message = "message"
 		}
 	}
-
-	object DslExtension : DSLintAnnotation("DSLExtension") {
-		object Attributes {
-			const val satisfies = "satisfies"
-		}
-	}
 }

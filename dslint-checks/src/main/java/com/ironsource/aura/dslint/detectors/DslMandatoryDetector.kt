@@ -15,15 +15,19 @@ import com.intellij.psi.util.PropertyUtilBase
 import com.ironsource.aura.dslint.DSLintAnnotation
 import com.ironsource.aura.dslint.utils.nullIfEmpty
 import com.ironsource.aura.dslint.utils.resolveStringAttributeValue
-import org.jetbrains.uast.UAnnotated
+import org.jetbrains.kotlin.psi.KtCallableDeclaration
+import org.jetbrains.kotlin.psi.KtPropertyAccessor
 import org.jetbrains.uast.UBinaryExpression
 import org.jetbrains.uast.UBlockExpression
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UIdentifier
 import org.jetbrains.uast.ULambdaExpression
+import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UReferenceExpression
+import org.jetbrains.uast.UTypeReferenceExpression
 import org.jetbrains.uast.toUElement
+import org.jetbrains.uast.tryResolve
 import org.jetbrains.uast.util.isAssignment
 import org.jetbrains.uast.util.isMethodCall
 import kotlin.contracts.ExperimentalContracts
@@ -49,10 +53,13 @@ class DslMandatoryDetector : DSLintDetector() {
 	) {
 		val dslPropertiesDefs = getDslMandatoryProperties(dslLintClass)
 
+		val blockBody = node.body as UBlockExpression
+
 		val dslPropertiesCalls = getDslMandatoryCallsCount(
 			dslPropertiesDefs,
-			node.body as UBlockExpression
-		)
+			blockBody,
+			dslLintClass
+		).toMutableMap()
 
 		// Report groups with no calls
 		dslPropertiesCalls
@@ -99,12 +106,20 @@ class DslMandatoryDetector : DSLintDetector() {
 
 	private fun getDslMandatoryCallsCount(
 		dslProperties: Map<String, List<DSLMandatoryAttribute>>,
-		blockBody: UBlockExpression
+		blockBody: UBlockExpression,
+		dslLintClass: PsiClass
 	): Map<String, Int> {
-		val propertiesCalls = getDslPropertiesCallsCount(dslProperties, blockBody)
-		val functionsCalls = getDslMandatoryFunctionsCallsCount(dslProperties, blockBody)
+		val dslPropsCalls = getDslPropertiesCallsCount(dslProperties, blockBody).toMutableMap()
+		getExtensionPropertiesDslMandatoryCallsCount(blockBody, dslLintClass, dslProperties).forEach {
+			dslPropsCalls += it
+		}
 
-		return (propertiesCalls + functionsCalls).toMutableMap()
+		val dslMethodCalls = getDslMandatoryMethodCallsCount(dslProperties, blockBody).toMutableMap()
+		getExtensionMethodsDslMandatoryCallsCount(blockBody, dslLintClass, dslProperties).forEach {
+			dslMethodCalls += it
+		}
+
+		return (dslPropsCalls + dslMethodCalls).toMutableMap()
 			.apply {
 				dslProperties.keys.forEach {
 					this@apply.putIfAbsent(it, 0)
@@ -112,8 +127,40 @@ class DslMandatoryDetector : DSLintDetector() {
 			}
 	}
 
+	private fun getExtensionMethodsDslMandatoryCallsCount(
+		blockBody: UBlockExpression,
+		dslLintClass: PsiClass,
+		dslPropertiesDefs: Map<String, List<DSLMandatoryAttribute>>
+	) = blockBody.expressions
+		.filterIsInstance<UCallExpression>()
+		.filter { it.isMethodCall() }
+		.filter {
+			it.methodReceiverQualifiedName == dslLintClass.qualifiedName
+		}
+		.map { methodCall ->
+			getDslMandatoryCallsCount(dslPropertiesDefs, methodCall.methodBodyBlock, dslLintClass).filterValues {
+				it > 0
+			}
+		}
+
+	private fun getExtensionPropertiesDslMandatoryCallsCount(
+		blockBody: UBlockExpression,
+		dslLintClass: PsiClass,
+		dslPropertiesDefs: Map<String, List<DSLMandatoryAttribute>>
+	) = blockBody.expressions
+		.filterIsInstance<UBinaryExpression>()
+		.filter { it.isAssignment() }
+		.filter {
+			it.propertyReceiverQualifiedName == dslLintClass.qualifiedName
+		}
+		.map { propertySetter ->
+			getDslMandatoryCallsCount(dslPropertiesDefs, propertySetter.propertySetterBody, dslLintClass).filterValues {
+				it > 0
+			}
+		}
+
 	// Returns mapping of group name to calls count
-	private fun getDslMandatoryFunctionsCallsCount(
+	private fun getDslMandatoryMethodCallsCount(
 		dslProperties: Map<String, List<DSLMandatoryAttribute>>,
 		blockBody: UBlockExpression
 	): Map<String, Int> {
@@ -127,16 +174,7 @@ class DslMandatoryDetector : DSLintDetector() {
 			.eachCount()
 	}
 
-	private fun getInvokedDslMethodName(callExpression: UCallExpression): String {
-		// Try to resolve as dsl extension
-		val dslExtensionAnnotation = ((callExpression.resolve()).toUElement() as UAnnotated).findAnnotation(
-			DSLintAnnotation.DslExtension.name
-		)
-
-		return if (dslExtensionAnnotation != null)
-			dslExtensionAnnotation.findAttributeValue(DSLintAnnotation.DslExtension.Attributes.satisfies)!!.evaluate() as String
-		else callExpression.methodName!!
-	}
+	private fun getInvokedDslMethodName(callExpression: UCallExpression) = callExpression.methodName!!
 
 	// Returns mapping of group name to calls count
 	private fun getDslPropertiesCallsCount(
@@ -153,18 +191,7 @@ class DslMandatoryDetector : DSLintDetector() {
 			.eachCount()
 	}
 
-	private fun getAssignedDSLAttribute(it: UBinaryExpression): String {
-		val refExpression = it.leftOperand as UReferenceExpression
-
-		// Try to resolve as dsl extension
-		val dslExtensionAnnotation = ((refExpression.resolve()).toUElement() as UAnnotated).findAnnotation(
-			DSLintAnnotation.DslExtension.name
-		)
-
-		return if (dslExtensionAnnotation != null)
-			dslExtensionAnnotation.findAttributeValue(DSLintAnnotation.DslExtension.Attributes.satisfies)!!.evaluate() as String
-		else ((refExpression.referenceNameElement) as UIdentifier).name
-	}
+	private fun getAssignedDSLAttribute(it: UBinaryExpression) = (((it.leftOperand as UReferenceExpression).referenceNameElement) as UIdentifier).name
 
 	private fun getAttributeGroup(
 		attributeName: String,
@@ -195,19 +222,36 @@ class DslMandatoryDetector : DSLintDetector() {
 
 	private fun createDslMandatoryAttribute(method: PsiMethod): DSLMandatoryAttribute {
 		val annotation = method.getAnnotation(DSLintAnnotation.DslMandatory.name)
-		val group =
-			annotation.resolveStringAttributeValue(DSLintAnnotation.DslMandatory.Attributes.group)
-				.nullIfEmpty()
-		val message =
-			annotation.resolveStringAttributeValue(DSLintAnnotation.DslMandatory.Attributes.message)
-				.nullIfEmpty()
+		val group = annotation.resolveStringAttributeValue(DSLintAnnotation.DslMandatory.Attributes.group)
+			.nullIfEmpty()
+		val message = annotation.resolveStringAttributeValue(DSLintAnnotation.DslMandatory.Attributes.message)
+			.nullIfEmpty()
 		val isPropertySetter = PropertyUtilBase.isSetterName(method.name)
-		val type = if (isPropertySetter) Type.PROPERTY else Type.FUNCTION
-		val name =
-			if (isPropertySetter) PropertyUtilBase.getPropertyName(method)!! else method.name
+		val type = if (isPropertySetter) Type.PROPERTY else Type.METHOD
+		val name = if (isPropertySetter) PropertyUtilBase.getPropertyName(method)!! else method.name
 		return DSLMandatoryAttribute(name, type, group, message)
 	}
 }
+
+private val UBinaryExpression.propertySetterBody
+	get() = (leftOperand.tryResolve().toUElement() as UMethod).uastBody as UBlockExpression
+
+private val UBinaryExpression.propertyReceiverQualifiedName
+	get() = try {
+		(((((leftOperand.tryResolve()).toUElement() as UMethod).sourcePsi) as KtPropertyAccessor).property.receiverTypeReference.toUElement() as UTypeReferenceExpression).type.canonicalText
+	} catch (e: Exception) {
+		null
+	}
+
+private val UCallExpression.methodBodyBlock
+	get() = (resolve().toUElement() as UMethod).uastBody as UBlockExpression
+
+private val UCallExpression.methodReceiverQualifiedName
+	get() = try {
+		(((resolve().toUElement()!!.sourcePsi as KtCallableDeclaration).receiverTypeReference).toUElement() as UTypeReferenceExpression).type.canonicalText
+	} catch (e: Exception) {
+		null
+	}
 
 data class DSLMandatoryAttribute(
 	val name: String,
@@ -217,5 +261,5 @@ data class DSLMandatoryAttribute(
 )
 
 enum class Type {
-	FUNCTION, PROPERTY
+	METHOD, PROPERTY
 }
