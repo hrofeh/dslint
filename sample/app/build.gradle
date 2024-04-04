@@ -1,5 +1,8 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
+plugins {
+    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.kotlin.android)
+}
+
 apply from: '../../versions.gradle'
 
 android {
