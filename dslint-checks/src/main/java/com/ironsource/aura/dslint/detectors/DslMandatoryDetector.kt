@@ -13,21 +13,19 @@ import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.util.PropertyUtilBase
 import com.ironsource.aura.dslint.DSLintAnnotation
+import com.ironsource.aura.dslint.utils.methodBodyBlock
+import com.ironsource.aura.dslint.utils.methodReceiverQualifiedName
 import com.ironsource.aura.dslint.utils.nullIfEmpty
+import com.ironsource.aura.dslint.utils.propertyReceiverQualifiedName
+import com.ironsource.aura.dslint.utils.propertySetterBody
 import com.ironsource.aura.dslint.utils.resolveStringAttributeValue
-import org.jetbrains.kotlin.psi.KtCallableDeclaration
-import org.jetbrains.kotlin.psi.KtPropertyAccessor
 import org.jetbrains.uast.UBinaryExpression
 import org.jetbrains.uast.UBlockExpression
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UIdentifier
 import org.jetbrains.uast.ULambdaExpression
-import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UReferenceExpression
-import org.jetbrains.uast.UTypeReferenceExpression
-import org.jetbrains.uast.toUElement
-import org.jetbrains.uast.tryResolve
 import org.jetbrains.uast.util.isAssignment
 import org.jetbrains.uast.util.isMethodCall
 import kotlin.contracts.ExperimentalContracts
@@ -51,22 +49,14 @@ class DslMandatoryDetector : DSLintDetector() {
 		node: ULambdaExpression,
 		dslLintClass: PsiClass
 	) {
-		val dslPropertiesDefs = getDslMandatoryProperties(dslLintClass)
+		val dslProperties = getDslMandatoryProperties(dslLintClass)
+		val dslPropertiesCalls = getDslMandatoryCallsCount(dslProperties, node.body as UBlockExpression, dslLintClass)
 
-		val blockBody = node.body as UBlockExpression
-
-		val dslPropertiesCalls = getDslMandatoryCallsCount(
-			dslPropertiesDefs,
-			blockBody,
-			dslLintClass
-		).toMutableMap()
-
-		// Report groups with no calls
-		dslPropertiesCalls
-			.filterValues { it == 0 }
-			.forEach {
-				reportMissingMandatoryAttribute(dslPropertiesDefs, it.key, context, node)
-			}
+		dslProperties.keys.filter {
+			!dslPropertiesCalls.containsKey(it)
+		}.forEach {
+			reportMissingMandatoryAttribute(dslProperties, it, context, node)
+		}
 	}
 
 	private fun reportMissingMandatoryAttribute(
@@ -120,11 +110,6 @@ class DslMandatoryDetector : DSLintDetector() {
 		}
 
 		return (dslPropsCalls + dslMethodCalls).toMutableMap()
-			.apply {
-				dslProperties.keys.forEach {
-					this@apply.putIfAbsent(it, 0)
-				}
-			}
 	}
 
 	private fun getExtensionMethodsDslMandatoryCallsCount(
@@ -137,10 +122,9 @@ class DslMandatoryDetector : DSLintDetector() {
 		.filter {
 			it.methodReceiverQualifiedName == dslLintClass.qualifiedName
 		}
-		.map { methodCall ->
-			getDslMandatoryCallsCount(dslPropertiesDefs, methodCall.methodBodyBlock, dslLintClass).filterValues {
-				it > 0
-			}
+		.mapNotNull { it.methodBodyBlock }
+		.map { methodBodyBlock ->
+			getDslMandatoryCallsCount(dslPropertiesDefs, methodBodyBlock, dslLintClass)
 		}
 
 	private fun getExtensionPropertiesDslMandatoryCallsCount(
@@ -153,10 +137,11 @@ class DslMandatoryDetector : DSLintDetector() {
 		.filter {
 			it.propertyReceiverQualifiedName == dslLintClass.qualifiedName
 		}
-		.map { propertySetter ->
-			getDslMandatoryCallsCount(dslPropertiesDefs, propertySetter.propertySetterBody, dslLintClass).filterValues {
-				it > 0
-			}
+		.mapNotNull {
+			it.propertySetterBody
+		}
+		.map { propertySetterBody ->
+			getDslMandatoryCallsCount(dslPropertiesDefs, propertySetterBody, dslLintClass)
 		}
 
 	// Returns mapping of group name to calls count
@@ -232,26 +217,6 @@ class DslMandatoryDetector : DSLintDetector() {
 		return DSLMandatoryAttribute(name, type, group, message)
 	}
 }
-
-private val UBinaryExpression.propertySetterBody
-	get() = (leftOperand.tryResolve().toUElement() as UMethod).uastBody as UBlockExpression
-
-private val UBinaryExpression.propertyReceiverQualifiedName
-	get() = try {
-		(((((leftOperand.tryResolve()).toUElement() as UMethod).sourcePsi) as KtPropertyAccessor).property.receiverTypeReference.toUElement() as UTypeReferenceExpression).type.canonicalText
-	} catch (e: Exception) {
-		null
-	}
-
-private val UCallExpression.methodBodyBlock
-	get() = (resolve().toUElement() as UMethod).uastBody as UBlockExpression
-
-private val UCallExpression.methodReceiverQualifiedName
-	get() = try {
-		(((resolve().toUElement()!!.sourcePsi as KtCallableDeclaration).receiverTypeReference).toUElement() as UTypeReferenceExpression).type.canonicalText
-	} catch (e: Exception) {
-		null
-	}
 
 data class DSLMandatoryAttribute(
 	val name: String,
