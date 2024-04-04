@@ -1,6 +1,21 @@
-rootProject.name='DSLint'
-include ':app'
-include ':sample-sdk'
+pluginManagement {
+    repositories {
+        google()
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'DSLint'
+include ':sample:app'
+include ':sample:sdk'
 include ':dslint'
 include ':dslint-checks'
 include ':dslint-annotations'

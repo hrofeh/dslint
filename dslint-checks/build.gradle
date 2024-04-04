@@ -8,7 +8,6 @@ targetCompatibility = JavaVersion.VERSION_1_8
 apply from: rootProject.file('gradle/mvn_push_java.gradle')
 
 dependencies {
-  compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
   compileOnly 'com.android.tools.lint:lint-api:27.0.1'
   compileOnly 'com.android.tools.lint:lint-checks:27.0.1'
 }
