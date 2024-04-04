@@ -4,8 +4,8 @@ import com.ironsource.aura.dslint.annotations.DSLExtension
 
 fun create() {
 	dslTest {
-		extId = "2414"
-		firstName = "Hanan"
+		id = "2414"
+		name = "Hanan"
 		inner {
 			innerProp = ""
 			extInnerProp2()
@@ -18,8 +18,8 @@ fun InnerDSL.extInnerProp2() {
 	innerProp2()
 }
 
-@set:DSLExtension("id")
-var SomeDSLApi.extId: String
+@set:DSLExtension("firstName")
+var SomeDSLApi.name: String
 	get() = throw UnsupportedOperationException()
 	set(value) {
 		this.id = value
