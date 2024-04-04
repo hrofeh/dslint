@@ -109,7 +109,7 @@ class DslMandatoryDetector : DSLintDetector() {
 			dslMethodCalls += it
 		}
 
-		return (dslPropsCalls + dslMethodCalls).toMutableMap()
+		return dslPropsCalls + dslMethodCalls
 	}
 
 	private fun getExtensionMethodsDslMandatoryCallsCount(
