@@ -5,6 +5,8 @@ apply from: '../versions.gradle'
 android {
     compileSdkVersion COMPILE_SDK_VERSION
 
+    namespace "com.hananrh.dslint.sample.sdk"
+
     defaultConfig {
         minSdkVersion MIN_SDK_VERSION
         targetSdkVersion TARGET_SDK_VERSION
