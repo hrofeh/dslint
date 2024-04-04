@@ -1,6 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 
-package com.ironsource.aura.dslint.detectors
+package com.hananrh.dslint.detectors
 
 import com.android.tools.lint.detector.api.Category
 import com.android.tools.lint.detector.api.Implementation
@@ -12,13 +12,13 @@ import com.android.tools.lint.detector.api.Severity
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.util.PropertyUtilBase
-import com.ironsource.aura.dslint.DSLintAnnotation
-import com.ironsource.aura.dslint.utils.methodBodyBlock
-import com.ironsource.aura.dslint.utils.methodReceiverQualifiedName
-import com.ironsource.aura.dslint.utils.nullIfEmpty
-import com.ironsource.aura.dslint.utils.propertyReceiverQualifiedName
-import com.ironsource.aura.dslint.utils.propertySetterBody
-import com.ironsource.aura.dslint.utils.resolveStringAttributeValue
+import com.hananrh.dslint.DSLintAnnotation
+import com.hananrh.dslint.utils.methodBodyBlock
+import com.hananrh.dslint.utils.methodReceiverQualifiedName
+import com.hananrh.dslint.utils.nullIfEmpty
+import com.hananrh.dslint.utils.propertyReceiverQualifiedName
+import com.hananrh.dslint.utils.propertySetterBody
+import com.hananrh.dslint.utils.resolveStringAttributeValue
 import org.jetbrains.uast.UBinaryExpression
 import org.jetbrains.uast.UBlockExpression
 import org.jetbrains.uast.UCallExpression

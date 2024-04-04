@@ -4,7 +4,7 @@ apply plugin: 'kotlin-android'
 apply from: '../versions.gradle'
 
 android {
-    compileSdkVersion COMPILE_SDK_VERSION
+    compileSdk COMPILE_SDK_VERSION
 
     namespace "com.hananrh.dslint.annotations"
 

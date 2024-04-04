@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 apply from: '../versions.gradle'
 
 android {
-    compileSdkVersion COMPILE_SDK_VERSION
+    compileSdk COMPILE_SDK_VERSION
 
     namespace "com.hananrh.dslint.sample.sdk"
 
@@ -31,9 +31,6 @@ android {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-//    implementation "com.ironsource.aura.dslint:dslint-annotations:1.0.1"
-//    lintPublish "com.ironsource.aura.dslint:dslint-checks:1.0.1"
 
     implementation project(":dslint-annotations")
     lintPublish project(":dslint-checks")

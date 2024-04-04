@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 apply from: '../versions.gradle'
 
 android {
-    compileSdkVersion 34
+    compileSdk 34
 
     namespace "com.hananrh.dslint.sample"
 
@@ -30,7 +30,5 @@ dependencies {
 
     implementation project(":sample-sdk")
     implementation project(":dslint")
-
-//    implementation "com.ironsource.aura.dslint:dslint:1.0.1"
 }
 

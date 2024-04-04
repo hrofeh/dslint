@@ -3,26 +3,27 @@ DSLint
 
 A lightweight Android linter for Kotlin DSL aimed to solve the problem of verifying mandatory DSL attributes at compile time.
 ---
- 
+
 Usage
 ---
+
 ```kotlin
 @DSLint
 interface SomeDSLApi {
 
-    @set:DSLMandatory(message = "ID please")
-    var id: String
+	@set:DSLMandatory(message = "ID please")
+	var id: String
 
-    @set:DSLMandatory(group = "name")
-    var firstName: String
+	@set:DSLMandatory(group = "name")
+	var firstName: String
 
-    @set:DSLMandatory(group = "name")
-    var fullName: String
+	@set:DSLMandatory(group = "name")
+	var fullName: String
 
-    var optional: String
+	var optional: String
 
-    @DSLMandatory
-    fun inner(block: SomeInnerDSLApi.() -> Unit)
+	@DSLMandatory
+	fun inner(block: SomeInnerDSLApi.() -> Unit)
 }
 ```
 
@@ -30,10 +31,13 @@ interface SomeDSLApi {
 
 Annotations
 ---
+
 #### `@DSLint`
+
 Use on a DSL class/interface that you want DSLint to verify.
 
 #### `@DSLMandatory`
+
 Use on mandatory DSL properties setters or functions.
 Properties/functions annotated by this will generate a lint error if not
 defined in the DSL lambda.
@@ -43,15 +47,16 @@ Grouping
 Mandatory properties can be grouped together using the `group` attribute
 in the `@DSLMandatory` annotation.
 DSLint will verify that at least one of the properties in the group is defined.
+
 ```kotlin
 @DSLint
 interface SomeDSLApi {
 
-    @set:DSLMandatory(group = "name")
-    var firstName: String
+	@set:DSLMandatory(group = "name")
+	var firstName: String
 
-    @set:DSLMandatory(group = "name")
-    var fullName: String
+	@set:DSLMandatory(group = "name")
+	var fullName: String
 }
 ```
 
@@ -59,19 +64,21 @@ Custom message
 ---
 Custom error message can be defined using the `message` attribute in the `@DSLMandatory` annotation.
 A custom message for grouped properties should be defined on the first property of the group.
+
 ```kotlin
 @DSLint
 interface SomeDSLApi {
 
-    @set:DSLMandatory(message = "ID please")
-    var id: String
+	@set:DSLMandatory(message = "ID please")
+	var id: String
 }
 ```
+
 ![Sample](images/sample_custom.png)
 
 Quickfix
 ---
-DSLint offers quick fixes for adding missing mandatory properties. 
+DSLint offers quick fixes for adding missing mandatory properties.
 ![Sample](images/sample_quickfix.png)
 
 Requirements
@@ -83,25 +90,32 @@ Android Gradle Plugin >= 4.0.1
 
 Download
 --------
+
 #### For app developers
+
+```groovy
+maven { url 'https://jitpack.io' }
+```
+
 ```groovy
 dependencies {
-    implementation 'com.ironsource.aura.dslint:dslint:1.0.3'
+    implementation 'com.github.hananrh.dslint:dslint:1.1.0'
 }
 ```
 
 #### For SDK developers (DSLint linter will run on the app dependant on the SDK)
+
 ```groovy
 dependencies {
-    implementation 'com.ironsource.aura.dslint:dslint-annotations:1.0.3'
-    lintPublish 'com.ironsource.aura.dslint:dslint-checks:1.0.3'
+    implementation 'com.github.hananrh.dslint:dslint-annotations:1.1.0'
+    lintPublish 'com.github.hananrh.dslint:dslint-checks:1.1.0'
 }
 ```
 
 License
 -------
 
-Copyright (c) 2020 Hanan Rofe Haim
+Copyright (c) 2024 Hanan Rofe Haim
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

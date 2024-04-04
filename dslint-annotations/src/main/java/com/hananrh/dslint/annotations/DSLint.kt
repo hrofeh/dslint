@@ -1,4 +1,4 @@
-package com.ironsource.aura.dslint.annotations
+package com.hananrh.dslint.annotations
 
 /**
  * DSLint library annotation.

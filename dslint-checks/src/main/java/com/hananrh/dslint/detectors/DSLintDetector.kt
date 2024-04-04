@@ -1,14 +1,14 @@
 @file:Suppress("UnstableApiUsage")
 
-package com.ironsource.aura.dslint.detectors
+package com.hananrh.dslint.detectors
 
 import com.android.tools.lint.client.api.UElementHandler
 import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.isJava
 import com.intellij.psi.PsiClass
-import com.ironsource.aura.dslint.DSLintAnnotation
-import com.ironsource.aura.dslint.utils.getReceiverType
+import com.hananrh.dslint.DSLintAnnotation
+import com.hananrh.dslint.utils.getReceiverType
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.ULambdaExpression

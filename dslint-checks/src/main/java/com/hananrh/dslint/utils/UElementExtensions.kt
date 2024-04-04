@@ -1,4 +1,4 @@
-package com.ironsource.aura.dslint.utils
+package com.hananrh.dslint.utils
 
 import org.jetbrains.kotlin.psi.KtCallableDeclaration
 import org.jetbrains.kotlin.psi.KtPropertyAccessor

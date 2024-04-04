@@ -1,4 +1,4 @@
-package com.ironsource.aura.dslint.utils
+package com.hananrh.dslint.utils
 
 import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiLiteral

@@ -1,4 +1,4 @@
-package com.ironsource.aura.dslint
+package com.hananrh.dslint
 
 sealed class DSLintAnnotation(name: String) {
 	val name = "$PACKAGE_NAME.$ANNOTATIONS_PACKAGE_NAME.$name"

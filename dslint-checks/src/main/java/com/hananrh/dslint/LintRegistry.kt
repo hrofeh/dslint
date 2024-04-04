@@ -1,8 +1,8 @@
-package com.ironsource.aura.dslint
+package com.hananrh.dslint
 
 import com.android.tools.lint.client.api.IssueRegistry
 import com.android.tools.lint.detector.api.CURRENT_API
-import com.ironsource.aura.dslint.detectors.DslMandatoryDetector
+import com.hananrh.dslint.detectors.DslMandatoryDetector
 import kotlin.contracts.ExperimentalContracts
 
 /**

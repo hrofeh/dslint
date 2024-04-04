@@ -1,7 +1,7 @@
 package com.hananrh.dslint.sample
 
-import com.ironsource.aura.dslint.annotations.DSLMandatory
-import com.ironsource.aura.dslint.annotations.DSLint
+import com.hananrh.dslint.annotations.DSLMandatory
+import com.hananrh.dslint.annotations.DSLint
 
 fun dslTest(block: SomeDSLApi.() -> Unit) = SomeDslApiImpl().apply(block)
 
