@@ -16,6 +16,7 @@ dependencyResolutionManagement {
 rootProject.name = 'DSLint'
 include ':sample:app'
 include ':sample:sdk'
+include ':sample:sdk2'
 include ':dslint'
 include ':dslint-checks'
 include ':dslint-annotations'

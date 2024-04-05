@@ -1,13 +1,12 @@
-package com.hananrh.dslint.sample.sdk
+package com.hananrh.dslint.sample.sdk2
 
 import com.hananrh.dslint.annotations.DSLMandatory
 import com.hananrh.dslint.annotations.DSLint
 
-fun dslLibraryTest(block: SomeLibraryDSLApi.() -> Unit) = SomeLibraryDslApiImpl()
-    .apply(block)
+fun <T> dslLibraryTest(block: SomeLibraryDSLApi<T>.() -> Unit) = SomeLibraryDslApiImpl<T>().apply(block)
 
 @DSLint
-interface SomeLibraryDSLApi {
+interface SomeLibraryDSLApi<T> {
 
     object Group {
         const val NAME = "name"
@@ -25,21 +24,21 @@ interface SomeLibraryDSLApi {
     var optionalProp: String
 
     @DSLMandatory
-    fun inner(block: InnerLibraryDSL.() -> Unit)
+    fun inner(block: InnerLibraryDSL<T>.() -> Unit)
 }
 
-class SomeLibraryDslApiImpl : SomeLibraryDSLApi {
+class SomeLibraryDslApiImpl<T> : SomeLibraryDSLApi<T> {
     override lateinit var id: String
     override lateinit var firstName: String
     override lateinit var fullName: String
     override lateinit var optionalProp: String
-    override fun inner(block: InnerLibraryDSL.() -> Unit) {
+    override fun inner(block: InnerLibraryDSL<T>.() -> Unit) {
 
     }
 }
 
 @DSLint
-interface InnerLibraryDSL {
+interface InnerLibraryDSL<T> {
 
     @set:DSLMandatory
     var innerProp: String
@@ -48,9 +47,8 @@ interface InnerLibraryDSL {
     fun innerProp2()
 }
 
-class InnerDSLImpl : InnerLibraryDSL {
+class InnerDSLImpl<T> : InnerLibraryDSL<T> {
     override lateinit var innerProp: String
     override fun innerProp2() {
-
     }
 }

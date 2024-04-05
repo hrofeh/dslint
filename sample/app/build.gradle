@@ -28,5 +28,7 @@ android {
 }
 dependencies {
     implementation project(":dslint")
+    implementation project(":sample:sdk")
+    implementation project(":sample:sdk2")
 }
 

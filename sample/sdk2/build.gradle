@@ -1,0 +1,39 @@
+plugins {
+    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.kotlin.android)
+}
+
+apply from: '../../versions.gradle'
+
+android {
+    compileSdk COMPILE_SDK_VERSION
+
+    namespace "com.hananrh.dslint.sample.sdk2"
+
+    defaultConfig {
+        minSdkVersion MIN_SDK_VERSION
+        targetSdkVersion TARGET_SDK_VERSION
+        versionCode VERSION_CODE
+        versionName VERSION_NAME
+
+        consumerProguardFiles 'proguard-consumer-rules.pro'
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+            minifyEnabled false
+        }
+        release {
+            debuggable false
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation project(":dslint-annotations")
+    implementation project(":sample:sdk")
+    lintPublish project(":dslint-checks")
+}
