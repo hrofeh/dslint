@@ -5,7 +5,7 @@ import com.hananrh.dslint.sample.sdk2.dslLibraryTest
 import com.hananrh.dslint.sample.sdk2.extInner
 
 fun create() {
-	dslLibraryTest<Int> {
+	dslLibraryTest {
 		id = "2414"
 		name = "Hanan"
 		inner {

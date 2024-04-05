@@ -2,6 +2,7 @@ package com.hananrh.dslint.utils
 
 import com.intellij.psi.impl.source.PsiClassReferenceType
 import org.jetbrains.kotlin.psi.KtCallableDeclaration
+import org.jetbrains.kotlin.psi.KtProperty
 import org.jetbrains.kotlin.psi.KtPropertyAccessor
 import org.jetbrains.kotlin.psi.KtTypeReference
 import org.jetbrains.uast.UBinaryExpression
@@ -13,16 +14,15 @@ import org.jetbrains.uast.toUElement
 import org.jetbrains.uast.tryResolve
 
 internal val UBinaryExpression.property
-	get() = ((propertySetter?.sourcePsi) as? KtPropertyAccessor)?.property
+	get() = if (leftOperand.tryResolve() is KtProperty) {
+		leftOperand.tryResolve() as KtProperty
+	} else (((leftOperand.tryResolve().toUElement() as UMethod?)?.sourcePsi) as? KtPropertyAccessor)?.property
 
 internal val UBinaryExpression.propertyReceiverQualifiedName
 	get() = property?.receiverTypeReference.qualifiedName
 
-internal val UBinaryExpression.propertySetter
-	get() = leftOperand.tryResolve().toUElement() as UMethod?
-
-internal val UBinaryExpression.propertySetterBody
-	get() = propertySetter?.uastBody as UBlockExpression?
+val UBinaryExpression.propertySetterBody
+	get() = property?.setter?.bodyBlockExpression.toUElement() as UBlockExpression?
 
 internal val UCallExpression.methodBodyBlock
 	get() = (resolve().toUElement() as? UMethod)?.uastBody as UBlockExpression?
@@ -30,5 +30,5 @@ internal val UCallExpression.methodBodyBlock
 internal val UCallExpression.methodReceiverQualifiedName
 	get() = (resolve().toUElement()?.sourcePsi as? KtCallableDeclaration)?.receiverTypeReference.qualifiedName
 
-private val KtTypeReference?.qualifiedName
+internal val KtTypeReference?.qualifiedName
 	get() = ((toUElement() as? UTypeReferenceExpression)?.type as? PsiClassReferenceType)?.resolve()?.qualifiedName

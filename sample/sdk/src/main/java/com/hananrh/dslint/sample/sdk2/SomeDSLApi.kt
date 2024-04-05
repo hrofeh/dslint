@@ -3,7 +3,9 @@ package com.hananrh.dslint.sample.sdk2
 import com.hananrh.dslint.annotations.DSLMandatory
 import com.hananrh.dslint.annotations.DSLint
 
-fun <T> dslLibraryTest(block: SomeLibraryDSLApi<T>.() -> Unit) = SomeLibraryDslApiImpl<T>().apply(block)
+typealias IntTest = SomeLibraryDSLApi<Int>
+
+fun dslLibraryTest(block: IntTest.() -> Unit) = SomeLibraryDslApiImpl<Int>().apply(block)
 
 @DSLint
 interface SomeLibraryDSLApi<T> {
