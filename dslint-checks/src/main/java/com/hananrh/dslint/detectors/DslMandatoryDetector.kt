@@ -9,9 +9,6 @@ import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.LintFix
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
-import com.intellij.psi.PsiClass
-import com.intellij.psi.PsiMethod
-import com.intellij.psi.util.PropertyUtilBase
 import com.hananrh.dslint.DSLintAnnotation
 import com.hananrh.dslint.utils.methodBodyBlock
 import com.hananrh.dslint.utils.methodReceiverQualifiedName
@@ -19,6 +16,10 @@ import com.hananrh.dslint.utils.nullIfEmpty
 import com.hananrh.dslint.utils.propertyReceiverQualifiedName
 import com.hananrh.dslint.utils.propertySetterBody
 import com.hananrh.dslint.utils.resolveStringAttributeValue
+import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiMethod
+import com.intellij.psi.util.PropertyUtilBase
+import org.jetbrains.uast.UAnnotated
 import org.jetbrains.uast.UBinaryExpression
 import org.jetbrains.uast.UBlockExpression
 import org.jetbrains.uast.UCallExpression
@@ -26,6 +27,7 @@ import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UIdentifier
 import org.jetbrains.uast.ULambdaExpression
 import org.jetbrains.uast.UReferenceExpression
+import org.jetbrains.uast.toUElement
 import org.jetbrains.uast.util.isAssignment
 import org.jetbrains.uast.util.isMethodCall
 import kotlin.contracts.ExperimentalContracts
@@ -100,14 +102,15 @@ class DslMandatoryDetector : DSLintDetector() {
 		dslLintClass: PsiClass
 	): Map<String, Int> {
 		val dslPropsCalls = getDslPropertiesCallsCount(dslProperties, blockBody).toMutableMap()
-		getExtensionPropertiesDslMandatoryCallsCount(blockBody, dslLintClass, dslProperties).forEach {
-			dslPropsCalls += it
-		}
-
 		val dslMethodCalls = getDslMandatoryMethodCallsCount(dslProperties, blockBody).toMutableMap()
-		getExtensionMethodsDslMandatoryCallsCount(blockBody, dslLintClass, dslProperties).forEach {
-			dslMethodCalls += it
-		}
+
+		// Temp disabled - does not play well with extensions defined in a compile library
+//		getExtensionMethodsDslMandatoryCallsCount(blockBody, dslLintClass, dslProperties).forEach {
+//			dslMethodCalls += it
+//		}
+//      getExtensionPropertiesDslMandatoryCallsCount(blockBody, dslLintClass, dslProperties).forEach {
+//			dslPropsCalls += it
+//		}
 
 		return dslPropsCalls + dslMethodCalls
 	}
@@ -159,7 +162,16 @@ class DslMandatoryDetector : DSLintDetector() {
 			.eachCount()
 	}
 
-	private fun getInvokedDslMethodName(callExpression: UCallExpression) = callExpression.methodName!!
+	private fun getInvokedDslMethodName(callExpression: UCallExpression): String {
+		// Try to resolve as dsl extension
+		val dslExtensionAnnotation = ((callExpression.resolve()).toUElement() as UAnnotated).findAnnotation(
+			DSLintAnnotation.DslExtension.name
+		)
+
+		return if (dslExtensionAnnotation != null)
+			dslExtensionAnnotation.findAttributeValue(DSLintAnnotation.DslExtension.Attributes.extensionFor)!!.evaluate() as String
+		else callExpression.methodName!!
+	}
 
 	// Returns mapping of group name to calls count
 	private fun getDslPropertiesCallsCount(
@@ -176,7 +188,18 @@ class DslMandatoryDetector : DSLintDetector() {
 			.eachCount()
 	}
 
-	private fun getAssignedDSLAttribute(it: UBinaryExpression) = (((it.leftOperand as UReferenceExpression).referenceNameElement) as UIdentifier).name
+	private fun getAssignedDSLAttribute(it: UBinaryExpression): String {
+		val refExpression = it.leftOperand as UReferenceExpression
+
+		// Try to resolve as dsl extension
+		val dslExtensionAnnotation = ((refExpression.resolve()).toUElement() as? UAnnotated)?.findAnnotation(
+			DSLintAnnotation.DslExtension.name
+		)
+
+		return if (dslExtensionAnnotation != null)
+			dslExtensionAnnotation.findAttributeValue(DSLintAnnotation.DslExtension.Attributes.extensionFor)!!.evaluate() as String
+		else ((refExpression.referenceNameElement) as UIdentifier).name
+	}
 
 	private fun getAttributeGroup(
 		attributeName: String,

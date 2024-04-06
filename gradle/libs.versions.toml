@@ -1,8 +1,12 @@
 [versions]
 agp = "8.3.1"
-kotlin = "1.8.20"
+lintApi = "31.3.1" # Must always be agp version + 23 (see https://googlesamples.github.io/android-custom-lint-rules/api-guide.html)
+kotlin = "1.8.22"
 
 [libraries]
+kotlin-stdlib-jdk7 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk7", version.ref = "kotlin" }
+lint-api = { module = "com.android.tools.lint:lint-api", version.ref = "lintApi" }
+lint-checks = { module = "com.android.tools.lint:lint-checks", version.ref = "lintApi" }
 
 [bundles]
 

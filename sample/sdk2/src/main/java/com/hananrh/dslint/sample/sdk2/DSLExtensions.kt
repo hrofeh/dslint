@@ -1,6 +1,8 @@
 package com.hananrh.dslint.sample.sdk2
 
-fun InnerLibraryDSL<*>.extInner() {
-	innerProp = ""
-	innerProp2()
+import com.hananrh.dslint.annotations.DSLExtension
+
+@DSLExtension("firstName")
+inline fun <reified T> SomeLibraryDSLApi<T>.name2(name: String) {
+	firstName = name
 }

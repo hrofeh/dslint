@@ -1,21 +1,15 @@
 package com.hananrh.dslint.sample
 
-import com.hananrh.dslint.sample.sdk2.SomeLibraryDSLApi
 import com.hananrh.dslint.sample.sdk2.dslLibraryTest
-import com.hananrh.dslint.sample.sdk2.extInner
+import com.hananrh.dslint.sample.sdk2.name2
 
 fun create() {
 	dslLibraryTest {
 		id = "2414"
-		name = "Hanan"
+		name2("Hanan")
 		inner {
-			extInner()
+			innerProp = ""
+			innerProp2()
 		}
 	}
 }
-
-var SomeLibraryDSLApi<*>.name: String
-	get() = throw UnsupportedOperationException()
-	set(value) {
-		firstName = value
-	}
