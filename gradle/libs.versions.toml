@@ -1,16 +1,22 @@
 [versions]
-agp = "8.3.1"
-lintApi = "31.3.1" # Must always be agp version + 23 (see https://googlesamples.github.io/android-custom-lint-rules/api-guide.html)
-kotlin = "1.8.22"
+agp = "8.7.3"
+lintApi = "31.7.3" # Must always be agp version + 23 (see https://googlesamples.github.io/android-custom-lint-rules/api-guide.html)
+kotlin = "1.9.23"
 
 [libraries]
-kotlin-stdlib-jdk7 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk7", version.ref = "kotlin" }
+kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
 lint-api = { module = "com.android.tools.lint:lint-api", version.ref = "lintApi" }
 lint-checks = { module = "com.android.tools.lint:lint-checks", version.ref = "lintApi" }
 
 [bundles]
+lint-api = [
+    "kotlin-stdlib",
+    "lint-api",
+]
 
 [plugins]
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
+android-lint = { id = "com.android.lint", version.ref = "agp" }

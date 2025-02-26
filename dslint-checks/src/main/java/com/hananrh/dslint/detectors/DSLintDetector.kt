@@ -27,7 +27,8 @@ abstract class DSLintDetector : Detector(),
     final override fun createUastHandler(@Nonnull context: JavaContext): UElementHandler? {
         val psi = context.uastFile?.sourcePsi
         psi ?: return null
-        if (isJava(psi)) {
+
+        if (isJava(psi.language)) {
             return null
         }
 
