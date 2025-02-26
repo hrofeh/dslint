@@ -1,9 +1,11 @@
 plugins {
     id("java-library")
-    id("maven-publish")
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.android.lint)
 }
+
+apply(from = "$rootDir/versions.gradle")
+apply(from = "$rootDir/gradle/mvn_push_java.gradle")
 
 kotlin {
     jvmToolchain(17)
