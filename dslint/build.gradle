@@ -7,7 +7,7 @@ apply from: '../versions.gradle'
 android {
     compileSdk COMPILE_SDK_VERSION
 
-    namespace "com.hananrh.dslint"
+    namespace "com.hrofeh.dslint"
 
     defaultConfig {
         minSdkVersion MIN_SDK_VERSION

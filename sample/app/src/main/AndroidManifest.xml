@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.hananrh.dslint.sample">
+    package="com.hrofeh.dslint.sample">
 
     <application
         android:allowBackup="true"

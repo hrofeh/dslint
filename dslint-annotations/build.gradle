@@ -8,7 +8,7 @@ apply from: '../versions.gradle'
 android {
     compileSdk COMPILE_SDK_VERSION
 
-    namespace "com.hananrh.dslint.annotations"
+    namespace "com.hrofeh.dslint.annotations"
 
     defaultConfig {
         minSdkVersion MIN_SDK_VERSION

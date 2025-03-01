@@ -99,7 +99,7 @@ maven { url 'https://jitpack.io' }
 
 ```groovy
 dependencies {
-    implementation 'com.github.hananrh.dslint:dslint:1.1.1'
+    implementation 'com.github.hrofeh.dslint:dslint:1.1.1'
 }
 ```
 
@@ -107,8 +107,8 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'com.github.hananrh.dslint:dslint-annotations:1.1.1'
-    lintPublish 'com.github.hananrh.dslint:dslint-checks:1.1.1'
+    implementation 'com.github.hrofeh.dslint:dslint-annotations:1.1.1'
+    lintPublish 'com.github.hrofeh.dslint:dslint-checks:1.1.1'
 }
 ```
 
